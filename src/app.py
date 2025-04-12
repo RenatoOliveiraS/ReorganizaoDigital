@@ -32,7 +32,7 @@ def build_tree_widgets_from_api(data, indent=0, parent_path=[], on_plus_click=No
     widgets = []
     for node in data:
         current_path = parent_path + [node["nomepasta"]]
-        # Para capturar corretamente o valor da pasta, definimos o callback com argumento default:
+        # Função callback definida para capturar o caminho atual corretamente.
         def callback(e, folder_path=current_path):
             if on_plus_click:
                 on_plus_click(folder_path)
@@ -52,7 +52,14 @@ def build_tree_widgets_from_api(data, indent=0, parent_path=[], on_plus_click=No
             ft.Container(content=row, margin=ft.margin.only(left=indent))
         )
         if node.get("children"):
-            widgets.extend(build_tree_widgets_from_api(node["children"], indent=indent+20, parent_path=current_path, on_plus_click=on_plus_click))
+            widgets.extend(
+                build_tree_widgets_from_api(
+                    node["children"], 
+                    indent=indent+20, 
+                    parent_path=current_path, 
+                    on_plus_click=on_plus_click
+                )
+            )
     return widgets
 
 def build_tree_widgets(on_plus_click=None):
@@ -61,13 +68,13 @@ def build_tree_widgets(on_plus_click=None):
     return build_tree_widgets_from_api(data, indent=0, parent_path=[], on_plus_click=on_plus_click)
 
 def main(page: ft.Page):
-    page.title = "Estrutura de Pastas com End Drawer (API)"
+    page.title = "Estrutura de Pastas com End Drawer (API) - Scroll"
     
     def on_plus_click(path: list):
-        # Extrai o nome da pasta atual a partir do caminho
+        # Extrai o nome da pasta a partir do caminho
         folder_name = path[-1] if path else "Desconhecido"
         print("Botão clicado para pasta:", folder_name)
-        # Cria um NavigationDrawer para uso como end drawer
+        # Cria o NavigationDrawer que será usado como end drawer
         nd = ft.NavigationDrawer(
             controls=[
                 ft.NavigationDrawerDestination(
@@ -80,16 +87,22 @@ def main(page: ft.Page):
                 )
             ]
         )
-        # Configura o end drawer para abrir do lado direito
         page.end_drawer = nd
         nd.open = True
         page.update()
 
     # Constrói a árvore usando os dados da API
     tree_widgets = build_tree_widgets(on_plus_click)
+    # Cria um widget de coluna com scroll
     tree_column = ft.Column(controls=tree_widgets, scroll=ft.ScrollMode.AUTO)
+    # Envolvemos a coluna em um container com altura fixa para que a rolagem ocorra
+    tree_container = ft.Container(
+        content=tree_column,
+        height=600,  # ajuste conforme necessário
+        expand=True
+    )
 
     page.add(ft.Text("Estrutura de Pastas:", size=24))
-    page.add(tree_column)
+    page.add(tree_container)
 
 ft.app(target=main)
