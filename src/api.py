@@ -1,129 +1,70 @@
-# api.py
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from sqlalchemy import create_engine, MetaData, Table, select
 from typing import List, Optional
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Boolean, insert
-from sqlalchemy.exc import SQLAlchemyError
+from pydantic import BaseModel
 
 app = FastAPI()
 
 # Configuração da conexão com o banco de dados
 DATABASE_URI = 'mysql+pymysql://Hugo_Full:pA8FQ!11[?@54.232.17.99:3306/AxioDataBase'
-engine = create_engine(DATABASE_URI, echo=True)
-meta = MetaData()
+engine = create_engine(DATABASE_URI, echo=False)
+metadata = MetaData()
 
-# Refletindo as tabelas já existentes no banco
-weBotPastasEstruturas = Table(
-    "WeBotPastasEstruturas", meta,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("WeBotPastas_pasta_id", Integer),
-    Column("auto", String(10)),
-    Column("gerado", String(10)),
-    Column("pai_id", Integer),
-    Column("replicar_para_empresas", Boolean),
-    autoload_with=engine
-)
+# Reflete as tabelas existentes no banco de dados
+Estruturas = Table("WeBotPastasEstruturas", metadata, autoload_with=engine)
+Pastas = Table("WeBotPastasPastas", metadata, autoload_with=engine)
 
-weBotPastasPermissoes = Table(
-    "WeBotPastasPermissoes", meta,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("estrutura_id", Integer),
-    Column("grupo_id", Integer),
-    Column("permissao_id", Integer),
-    autoload_with=engine
-)
+# Modelo Pydantic para representar cada nó da árvore de pastas
+class FolderNode(BaseModel):
+    id: int
+    pai_id: Optional[int]
+    nomepasta: str
+    children: List["FolderNode"] = []
 
-# Modelos para entrada de dados
-class PermissaoInput(BaseModel):
-    grupo: str
-    permissao: str
+    class Config:
+        orm_mode = True
 
-class EstruturaInput(BaseModel):
-    WeBotPastas_pasta_id: Optional[int] = None
-    auto: Optional[str] = None
-    gerado: Optional[str] = None
-    pai_id: Optional[int] = None
-    replicar_para_empresas: Optional[bool] = False
-    permissoes: List[PermissaoInput]
+FolderNode.update_forward_refs()
 
-# Dicionários para mapear nomes de grupos e permissões para seus respectivos IDs
-# Esses valores podem vir de uma consulta a uma tabela ou serem configurados de outra forma
-grupos = {
-    "Admins. do domínio": 1,
-    "GRUPO\\Arquivo Digital - Diretoria": 2,
-    "GRUPO\\Arquivo Digital - Arquivo": 3,
-    "GRUPO\\Arquivo Digital - Comercial Colaboradores": 4,
-    "GRUPO\\Arquivo Digital - Comercial Facilitadores": 5,
-    "GRUPO\\Arquivo Digital - Contabil Colaboradores": 6,
-    "GRUPO\\Arquivo Digital - Contabil Facilitadores": 7,
-    "GRUPO\\Arquivo Digital - Equipe Apoio Técnico Comercial": 8,
-    "GRUPO\\Arquivo Digital - Expediente Colaboradores": 9,
-    "GRUPO\\Arquivo Digital - Expediente Facitadores": 10,
-    "GRUPO\\Arquivo Digital - Financeiro Colaboradores": 11,
-    "GRUPO\\Arquivo Digital - Financeiro Facilitadores": 12,
-    "GRUPO\\Arquivo Digital - Fiscal Colaboradores": 13,
-    "GRUPO\\Arquivo Digital - Fiscal Facilitadores": 14,
-    "GRUPO\\Arquivo Digital - Imposto de Renda Colaboradores": 15,
-    "GRUPO\\Arquivo Digital - Imposto de Renda Facilitadores": 16,
-    "GRUPO\\Arquivo Digital - Legal Colaboradores": 17,
-    "GRUPO\\Arquivo Digital - Legal Facilitadores": 18,
-    "GRUPO\\Arquivo Digital - Marketing Colaboradores": 19,
-    "GRUPO\\Arquivo Digital - Marketing Facilitadores": 20,
-    "GRUPO\\Arquivo Digital - MWS Colaboradores": 21,
-    "GRUPO\\Arquivo Digital - MWS Facilitadores": 22,
-    "GRUPO\\Arquivo Digital - Pessoal Colaboradores": 23,
-    "GRUPO\\Arquivo Digital - Pessoal Facilitadores": 24,
-    "GRUPO\\Arquivo Digital - Recepção Colaboradores": 25,
-    "GRUPO\\Arquivo Digital - Recepção Facilitadores": 26,
-    "GRUPO\\Arquivo Digital - Recursos Humanos Colaboradores": 27,
-    "GRUPO\\Arquivo Digital - Recursos Humanos Facilitadores": 28,
-    "GRUPO\\Arquivo Digital - Reinf Colaboradores": 29,
-    "GRUPO\\Arquivo Digital - Reinf Facilitadores": 30,
-    "GRUPO\\Arquivo Digital - Tributos Colaboradores": 31,
-    "GRUPO\\Arquivo Digital - Tributos Facilitadores": 32,
-    "GRUPO\\Arquivo Digital - Sucesso do Cliente Colaboradores": 33,
-    "GRUPO\\Arquivo Digital - Sucesso do Cliente Facilitadores": 34,
-    "RenatoS": 35
-}
-
-permissoes_dict = {
-    "Modify": 1,
-    "ReadAndExecute": 2,
-    "FullControl": 3
-}
-
-@app.post("/estruturas")
-def criar_estrutura(estrutura: EstruturaInput):
+@app.get("/arvore", response_model=List[FolderNode])
+def get_arvore():
+    """
+    Carrega a árvore de pastas:
+    - Realiza um join entre WeBotPastasEstruturas e WeBotPastasPastas
+    - Constrói um dicionário com cada nó indexado por id
+    - Associa cada nó ao seu pai, usando o campo pai_id
+    - Retorna os nós raiz (aqueles com pai_id nulo) como árvore
+    """
     with engine.connect() as conn:
-        trans = conn.begin()
-        try:
-            # Inserir a estrutura (pasta) no banco
-            ins = weBotPastasEstruturas.insert().values(
-                WeBotPastas_pasta_id=estrutura.WeBotPastas_pasta_id,
-                auto=estrutura.auto,
-                gerado=estrutura.gerado,
-                pai_id=estrutura.pai_id,
-                replicar_para_empresas=estrutura.replicar_para_empresas,
-            )
-            result = conn.execute(ins)
-            estrutura_id = result.inserted_primary_key[0]
+        stmt = select(
+            Estruturas.c.id,
+            Estruturas.c.pai_id,
+            Pastas.c.nomepasta
+        ).select_from(
+            Estruturas.join(Pastas, Estruturas.c.WeBotPastas_pasta_id == Pastas.c.id)
+        )
+        result = conn.execute(stmt).fetchall()
 
-            # Inserir cada permissão associada à estrutura
-            for perm in estrutura.permissoes:
-                grupo_id = grupos.get(perm.grupo)
-                permissao_id = permissoes_dict.get(perm.permissao)
-                if not grupo_id or not permissao_id:
-                    trans.rollback()
-                    raise HTTPException(status_code=400, detail=f"Grupo ou Permissão inválidos: {perm}")
-                ins_perm = weBotPastasPermissoes.insert().values(
-                    estrutura_id=estrutura_id,
-                    grupo_id=grupo_id,
-                    permissao_id=permissao_id
-                )
-                conn.execute(ins_perm)
+    # Cria um dicionário com os nós, indexados pelo id
+    nodes = {}
+    for row in result:
+        nodes[row.id] = {
+            "id": row.id,
+            "pai_id": row.pai_id,
+            "nomepasta": row.nomepasta,
+            "children": []
+        }
 
-            trans.commit()
-            return {"status": "sucesso", "estrutura_id": estrutura_id}
-        except SQLAlchemyError as e:
-            trans.rollback()
-            raise HTTPException(status_code=500, detail=f"Erro ao inserir dados: {e}")
+    # Constrói a árvore associando cada nó ao seu pai
+    tree = []
+    for node in nodes.values():
+        if node["pai_id"] is None:
+            tree.append(node)
+        else:
+            parent = nodes.get(node["pai_id"])
+            if parent:
+                parent["children"].append(node)
+            else:
+                # Se não encontrar um pai, trata-o como nó raiz
+                tree.append(node)
+    return tree
