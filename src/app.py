@@ -17,9 +17,9 @@ def main(page: ft.Page):
     )
 
     def update_content(page_name: str):
-        if page_name == "estrutura":
+        if page_name == "Estrutura":
             content_container.content = tree_page()
-        elif page_name == "pastas":
+        elif page_name == "Pasta":
             content_container.content = pastas_page()
         else:
             content_container.content = ft.Text("Página não definida")

@@ -42,7 +42,7 @@ def get_menu_layout(on_menu_select, content_container):
     logo_container = ft.Container(
         content=ft.Text("WeBot", size=20, weight="bold", color=Colors.WHITE),
         alignment=ft.alignment.center,
-        padding=ft.Padding(0, 20, 0, 10)
+        padding=ft.Padding(0, 20, 0, 20)
     )
 
     # Bloco: Menus (topo)
@@ -50,7 +50,7 @@ def get_menu_layout(on_menu_select, content_container):
         content=ft.Column(
             controls=[
                 expandable_section("Reorganização Digital", icons.ROCKET_LAUNCH, [
-                    "Estruturas", "Pastas"
+                    "Estrutura", "Pasta"
                 ])
             ],
             spacing=10,
