@@ -54,10 +54,18 @@ def build_tree_widgets(on_plus_click=None):
 def tree_page():
     tree_widgets = build_tree_widgets(on_plus_click=lambda path: print("Adicionar em:", path))
     tree_column = ft.Column(controls=tree_widgets, scroll=ft.ScrollMode.AUTO)
-    tree_container = ft.Container(content=tree_column, height=600, expand=True)
+    tree_container = ft.Container(
+        content=tree_column,
+        height=600,
+        expand=True,
+        
+        padding=20
+    )
     return ft.Column(
         controls=[
-            ft.Text("Estrutura de Pastas", size=24),
+            ft.Text("Estrutura de Pastas", size=24, weight="bold"),  # <- Título visível
             tree_container,
-        ]
+        ],
+        spacing=20
     )
+

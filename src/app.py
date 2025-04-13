@@ -3,7 +3,10 @@ from tree_page import tree_page
 from pastas_page import pastas_page
 from menu import get_menu_layout
 
+
+
 def main(page: ft.Page):
+    
     page.title = "Meu App - Estrutura de Pastas"
     page.window_width = 1000
     page.window_height = 600
@@ -13,7 +16,7 @@ def main(page: ft.Page):
     content_container = ft.Container(
         expand=True,
         padding=20,
-        bgcolor=ft.colors.GREY_100
+        
     )
 
     def update_content(page_name: str):
