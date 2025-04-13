@@ -5,6 +5,13 @@ from area_trabalho_page import area_trabalho_page
 API_URL = "http://localhost:8000/arvore"
 expanded_ids = set()
 
+def sort_tree_alphabetically(nodes):
+    for node in nodes:
+        if "children" in node and node["children"]:
+            sort_tree_alphabetically(node["children"])
+    nodes.sort(key=lambda x: x["nomepasta"].lower())
+
+
 def fetch_tree_data():
     try:
         response = requests.get(API_URL)
@@ -20,7 +27,7 @@ def fetch_tree_data():
 def tree_page():
     data = fetch_tree_data()
     tree_ref = ft.Ref[ft.Column]()
-
+    sort_tree_alphabetically(data)  
     def render_node(node, level=0):
         widgets = []
         node_id = node["id"]
@@ -69,6 +76,8 @@ def tree_page():
         widgets = []
         for node in data:
             if node["pai_id"] is None:
+                sort_tree_alphabetically(data)
+
                 widgets.extend(render_node(node, level=0))  # começa do nível 0
 
         tree_ref.current.controls = widgets
