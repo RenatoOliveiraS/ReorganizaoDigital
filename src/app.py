@@ -20,16 +20,30 @@ def main(page: ft.Page):
     )
 
     def update_content(page_name: str):
+        result = None
+
         if page_name == "Estrutura":
-            content_container.content = tree_page()
+            result = tree_page()
         elif page_name == "Pasta":
-            content_container.content = pastas_page()
+            result = pastas_page()
         else:
-            content_container.content = ft.Text("Página não definida")
+            result = ft.Text("Página não definida")
+
+        if isinstance(result, tuple):
+            content_container.content = result[0]
+            page.update()
+            result[1](None)  # chama o callback na hora
+
+        else:
+            content_container.content = result
+
         page.update()
+
 
     # Layout com menu lateral e área de conteúdo
     layout = get_menu_layout(update_content, content_container)
     page.add(layout)
+    # Página inicial ao abrir o app
+    update_content("Estrutura")
 
 ft.app(target=main)

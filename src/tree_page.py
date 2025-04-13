@@ -3,6 +3,7 @@ import requests
 from area_trabalho_page import area_trabalho_page
 
 API_URL = "http://localhost:8000/arvore"
+expanded_ids = set()
 
 def fetch_tree_data():
     try:
@@ -16,47 +17,72 @@ def fetch_tree_data():
         print("Erro ao buscar árvore:", e)
         return []
 
-def build_tree_widgets_from_api(data, indent=0, parent_path=[], on_plus_click=None):
-    widgets = []
-    for node in data:
-        current_path = parent_path + [node["nomepasta"]]
-        def callback(e, folder_path=current_path):
-            if on_plus_click:
-                on_plus_click(folder_path)
+def tree_page():
+    data = fetch_tree_data()
+    tree_ref = ft.Ref[ft.Column]()
 
-        row = ft.Row(
-            controls=[
-                ft.Icon(name=ft.Icons.FOLDER, size=20),
-                ft.Text(node["nomepasta"]),
+    def render_node(node, level=0):
+        widgets = []
+        node_id = node["id"]
+        children = node.get("children", [])
+        is_expandable = len(children) > 0
+        is_expanded = node_id in expanded_ids
+
+        def toggle_expand(e, target_id=node_id):
+            if target_id in expanded_ids:
+                expanded_ids.remove(target_id)
+            else:
+                expanded_ids.add(target_id)
+            refresh_tree()
+
+        row_controls = []
+
+        # Botão de expandir (somente se tiver filhos)
+        if is_expandable:
+            row_controls.append(
                 ft.IconButton(
-                    icon=ft.Icons.ADD,
-                    tooltip="Adicionar Pasta",
-                    on_click=callback,
-                ),
-            ],
-            vertical_alignment="center"
-        )
-
-        widgets.append(ft.Container(content=row, margin=ft.margin.only(left=indent)))
-
-        if node.get("children"):
-            widgets.extend(
-                build_tree_widgets_from_api(
-                    node["children"],
-                    indent=indent+20,
-                    parent_path=current_path,
-                    on_plus_click=on_plus_click,
+                    icon=ft.Icons.KEYBOARD_ARROW_DOWN if is_expanded else ft.Icons.CHEVRON_RIGHT,
+                    on_click=toggle_expand,
+                    icon_size=16
                 )
             )
-    return widgets
+        else:
+            row_controls.append(ft.Container(width=40))  # espaçamento para alinhar com quem tem botão
 
-def build_tree_widgets(on_plus_click=None):
-    data = fetch_tree_data()
-    return build_tree_widgets_from_api(data, indent=0, parent_path=[], on_plus_click=on_plus_click)
+        # Ícone da pasta + nome
+        row_controls.append(ft.Icon(name=ft.Icons.FOLDER, size=20))
+        row_controls.append(ft.Text(node["nomepasta"], color=ft.colors.WHITE))
 
-def tree_page():
-    tree_widgets = build_tree_widgets(on_plus_click=lambda path: print("Adicionar em:", path))
-    return area_trabalho_page(
-        titulo="Estrutura de Pastas",
-        body_controls=tree_widgets
+        row = ft.Row(controls=row_controls, vertical_alignment="center")
+        widgets.append(ft.Container(content=row, margin=ft.margin.only(left=level * 20)))
+
+        # Renderiza filhos, se expandido
+        if is_expandable and is_expanded:
+            for child in children:
+                widgets.extend(render_node(child, level + 1))
+
+        return widgets
+
+
+
+    def refresh_tree():
+        widgets = []
+        for node in data:
+            if node["pai_id"] is None:
+                widgets.extend(render_node(node, level=0))  # começa do nível 0
+
+        tree_ref.current.controls = widgets
+        tree_ref.current.update()
+
+    tree_column = ft.Column(ref=tree_ref, scroll=ft.ScrollMode.AUTO, expand=True)
+
+    def after_layout(e):
+        refresh_tree()
+
+    return (
+        area_trabalho_page(
+            titulo="Estrutura de Pastas",
+            body_controls=[tree_column]
+        ),
+        after_layout
     )
