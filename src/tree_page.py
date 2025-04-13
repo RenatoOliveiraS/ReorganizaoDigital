@@ -1,7 +1,8 @@
 import flet as ft
 import requests
+from area_trabalho_page import area_trabalho_page
 
-API_URL = "http://localhost:8000/arvore"  # Ajuste conforme necessário
+API_URL = "http://localhost:8000/arvore"
 
 def fetch_tree_data():
     try:
@@ -19,10 +20,10 @@ def build_tree_widgets_from_api(data, indent=0, parent_path=[], on_plus_click=No
     widgets = []
     for node in data:
         current_path = parent_path + [node["nomepasta"]]
-        # Define o callback para capturar o caminho atual corretamente
         def callback(e, folder_path=current_path):
             if on_plus_click:
                 on_plus_click(folder_path)
+
         row = ft.Row(
             controls=[
                 ft.Icon(name=ft.Icons.FOLDER, size=20),
@@ -35,7 +36,9 @@ def build_tree_widgets_from_api(data, indent=0, parent_path=[], on_plus_click=No
             ],
             vertical_alignment="center"
         )
+
         widgets.append(ft.Container(content=row, margin=ft.margin.only(left=indent)))
+
         if node.get("children"):
             widgets.extend(
                 build_tree_widgets_from_api(
@@ -53,19 +56,7 @@ def build_tree_widgets(on_plus_click=None):
 
 def tree_page():
     tree_widgets = build_tree_widgets(on_plus_click=lambda path: print("Adicionar em:", path))
-    tree_column = ft.Column(controls=tree_widgets, scroll=ft.ScrollMode.AUTO)
-    tree_container = ft.Container(
-        content=tree_column,
-        height=600,
-        expand=True,
-        
-        padding=20
+    return area_trabalho_page(
+        titulo="Estrutura de Pastas",
+        body_controls=tree_widgets
     )
-    return ft.Column(
-        controls=[
-            ft.Text("Estrutura de Pastas", size=24, weight="bold"),  # <- Título visível
-            tree_container,
-        ],
-        spacing=20
-    )
-
