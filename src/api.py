@@ -25,7 +25,7 @@ class FolderNode(BaseModel):
     class Config:
         orm_mode = True
 
-FolderNode.update_forward_refs()
+FolderNode.model_rebuild()
 
 # Novo modelo para representar cada mapeamento de permissão, onde pode haver vários grupo_ids para um permissao_id
 class PermissionMapping(BaseModel):
