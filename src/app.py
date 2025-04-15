@@ -23,7 +23,7 @@ def main(page: ft.Page):
         result = None
 
         if page_name == "Estrutura":
-            result = tree_page()
+            result = tree_page(page)
         elif page_name == "Pasta":
             result = pastas_page()
         else:
@@ -32,12 +32,12 @@ def main(page: ft.Page):
         if isinstance(result, tuple):
             content_container.content = result[0]
             page.update()
-            result[1](None)  # chama o callback na hora
-
+            result[1](None)  # chama o callback
         else:
             content_container.content = result
 
         page.update()
+
 
 
     # Layout com menu lateral e área de conteúdo
