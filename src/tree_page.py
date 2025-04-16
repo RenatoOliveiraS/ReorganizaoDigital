@@ -28,43 +28,34 @@ def tree_page(page: ft.Page):
     tree_ref = ft.Ref[ft.Column]()
     sort_tree_alphabetically(data)
 
-    def open_subfolder_form(e: ft.ControlEvent, parent_id: int):
-        # Cria o formulário para criação de subpasta a partir da pasta selecionada
+    def open_subfolder_dialog(e: ft.ControlEvent, parent_id: int):
+        print(f"[DEBUG] Botão plus clicado para criar subpasta com pai_id: {parent_id}")
         nome_field = ft.TextField(label="Nome da Subpasta", width=300)
-
+        
         def salvar_subpasta(e_salvar: ft.ControlEvent):
-            print(f"Salvar subpasta: {nome_field.value} com pai_id: {parent_id}")
-            # Fecha o end drawer após salvar
-            page.end_drawer = None
+            print(f"[DEBUG] Salvando subpasta: {nome_field.value} com pai_id: {parent_id}")
+            dialog.open = False
             page.update()
 
         salvar_button = ft.ElevatedButton("Salvar", on_click=salvar_subpasta)
         
-        # Container com padding para o formulário
-        form_content = ft.Container(
-            padding=20,
+        dialog = ft.AlertDialog(
+            modal=True,  # opcional, se desejar comportamento modal
+            title=ft.Text("Criar Nova Subpasta", size=20, weight="bold"),
             content=ft.Column(
                 controls=[
-                    ft.Text("Criar Nova Subpasta", size=20, weight="bold"),
                     nome_field,
-                    salvar_button
                 ],
-                alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=20,
-                width=350
-            )
+                spacing=20
+            ),
+            actions=[salvar_button],
+            actions_alignment=ft.MainAxisAlignment.END,
         )
-
-        # Criação do NavigationDrawer sem parâmetro "content" no construtor
-        drawer = ft.NavigationDrawer()
-        # Atribui o conteúdo ao drawer após a criação
-        drawer.content = form_content
-
-        # Configura o end drawer da page e abre-o
-        page.end_drawer = drawer
-        drawer.open = True
+        
+        page.overlay.append(dialog)  # Adiciona o diálogo à overlay
+        dialog.open = True
         page.update()
+
 
 
     def render_node(node, level=0):
@@ -82,36 +73,32 @@ def tree_page(page: ft.Page):
             refresh_tree()
 
         row_controls = []
-
         if is_expandable:
             row_controls.append(
                 ft.IconButton(
                     icon=ft.Icons.KEYBOARD_ARROW_DOWN if is_expanded else ft.Icons.CHEVRON_RIGHT,
                     on_click=toggle_expand,
-                    icon_size=16
+                    icon_size=16,
                 )
             )
         else:
             row_controls.append(ft.Container(width=40))
-
+            
         row_controls.append(ft.Icon(name=ft.Icons.FOLDER, size=20))
         row_controls.append(ft.Text(node["nomepasta"], color=ft.colors.WHITE))
-        
         row_controls.append(
             ft.IconButton(
                 icon=ft.Icons.ADD,
                 tooltip="Criar subpasta",
-                on_click=lambda e, node_id=node["id"]: open_subfolder_form(e, node_id)
+                on_click=lambda e, node_id=node["id"]: open_subfolder_dialog(e, node_id)
             )
         )
 
         row = ft.Row(controls=row_controls, vertical_alignment="center")
         widgets.append(ft.Container(content=row, margin=ft.margin.only(left=level * 20)))
-
         if is_expandable and is_expanded:
             for child in children:
                 widgets.extend(render_node(child, level + 1))
-
         return widgets
 
     def refresh_tree():
@@ -124,7 +111,7 @@ def tree_page(page: ft.Page):
         tree_ref.current.update()
 
     tree_column = ft.Column(ref=tree_ref, scroll=ft.ScrollMode.AUTO, expand=True)
-
+    
     def after_layout(e):
         refresh_tree()
 
@@ -135,3 +122,4 @@ def tree_page(page: ft.Page):
         ),
         after_layout
     )
+    

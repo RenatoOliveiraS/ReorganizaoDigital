@@ -44,6 +44,6 @@ def main(page: ft.Page):
     layout = get_menu_layout(update_content, content_container)
     page.add(layout)
     # Página inicial ao abrir o app
-    update_content("Estrutura")
+    #update_content("Estrutura")
 
 ft.app(target=main)
