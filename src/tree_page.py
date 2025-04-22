@@ -1,7 +1,7 @@
 import flet as ft
 import requests
 from area_trabalho_page import area_trabalho_page
-from multi_select_dropdown import MultiSelectDropdown
+from multi_select_dropdown_class import MultiSelectDropdown
 
 API_URL = "http://localhost:8000"
 expanded_ids: set[int] = set()
