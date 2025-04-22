@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches
+.cache/
+*.log
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+
+# VS Code config
+.vscode/
+
+# IDEs
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flet specific (se estiver usando cache)
+.flet/
+
+# Test / coverage
+htmlcov/
+.coverage
+.tox/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Ignore dotenv files (se sensíveis)
+.env
+.env.*
+
+# Others
+*.sqlite3
