@@ -47,14 +47,14 @@ def tree_page(page: ft.Page):
             page,
             pastas,
             display_key="nomepasta",
-            width=300,
+            width=450,
             hint_text="Selecione pasta...",
             max_selected_items=1
         )
 
         # --- criar nova pasta popup ---
         def criar_pasta_popup(ev: ft.ControlEvent):
-            nome_field = ft.TextField(label="Nome da Nova Pasta", width=400)
+            nome_field = ft.TextField(label="Nome da Nova Pasta", width=450)
 
             def salvar_pasta(ev2: ft.ControlEvent):
                 try:
@@ -89,7 +89,7 @@ def tree_page(page: ft.Page):
             except requests.RequestException:
                 tipos = []
             tp_dropdown = MultiSelectDropdown(
-                page, tipos, display_key="nome", width=400,
+                page, tipos, display_key="nome", width=450,
                 hint_text="Tipo permissão", max_selected_items=1
             )
 
@@ -98,7 +98,7 @@ def tree_page(page: ft.Page):
             except requests.RequestException:
                 grupos = []
             gp_dropdown = MultiSelectDropdown(
-                page, grupos, display_key="nome", width=400,
+                page, grupos, display_key="nome", width=450,
                 hint_text="Grupos", max_selected_items=None
             )
 
@@ -163,7 +163,7 @@ def tree_page(page: ft.Page):
             controls=[form_content],
             spacing=0,
             scroll=ft.ScrollMode.AUTO,
-            width=800,
+            width=950,
             height=800,
         )
 
