@@ -115,11 +115,10 @@ class MultiSelectDropdown:
 
     def _filter_options(self, e):
         self.search_query = (self.search_field.value or "").lower().strip()
+        # no single-select não há "Todos"
         if self.max_selected_items == 1:
-            # single-select: mostra todas as opções que batem com a busca
             candidates = self.all_options
         else:
-            # multi-select: exclui já selecionadas
             candidates = [
                 opt for opt in self.all_options
                 if opt not in self.selected_options
@@ -128,7 +127,28 @@ class MultiSelectDropdown:
             opt for opt in candidates
             if self.search_query in self._get_label(opt).lower()
         ]
+
         self.dropdown_list.controls.clear()
+
+        # adiciona opção "Todos" no multi-select ilimitado ou limitado
+        if self.max_selected_items != 1 and filtered:
+            self.dropdown_list.controls.append(
+                ft.Container(
+                    content=ft.Row([
+                        ft.Text("Todos", expand=True),
+                        ft.IconButton(
+                            icon=ft.icons.LIST,
+                            icon_size=14,
+                            on_click=lambda e: self._select_all(),
+                            tooltip="Selecionar todas"
+                        )
+                    ], spacing=5, alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                    padding=ft.padding.all(6),
+                    on_click=lambda e: self._select_all()
+                )
+            )
+            self.dropdown_list.controls.append(ft.Divider())
+
         for opt in filtered:
             label = self._get_label(opt)
             item = ft.Container(
@@ -145,15 +165,30 @@ class MultiSelectDropdown:
                 on_click=lambda e, o=opt: self._select_option(o),
             )
             self.dropdown_list.controls.append(item)
+
         self.page.update()
 
+    def _select_all(self):
+        # determina o que falta selecionar
+        to_select = [
+            opt for opt in self.all_options
+            if opt not in self.selected_options
+        ]
+        # respeita limite, se houver
+        if self.max_selected_items is not None:
+            slots = self.max_selected_items - len(self.selected_options)
+            to_select = to_select[:slots]
+        # adiciona tudo
+        self.selected_options.extend(to_select)
+        self.on_change(self.selected_options)
+        self._build_chips()
+        self._hide_dropdown()
+
     def _select_option(self, opt: Any):
-        # single-select
         if self.max_selected_items == 1:
             self.selected_options = [opt]
             self.on_change(self.selected_options)
         else:
-            # multi-select com limite
             if opt not in self.selected_options:
                 if (self.max_selected_items is None
                         or len(self.selected_options) < self.max_selected_items):
