@@ -30,6 +30,7 @@ def tree_page(page: ft.Page):
     sort_tree_alphabetically(data)
 
     def open_subfolder_dialog(e: ft.ControlEvent, parent_id: int):
+        # Switch “Auto”
         auto_switch = ft.Switch(label="Auto", value=False)
 
         # --- pasta dropdown (single-select) ---
@@ -51,9 +52,9 @@ def tree_page(page: ft.Page):
             max_selected_items=1
         )
 
-        # --- criar nova pasta ---
+        # --- criar nova pasta popup ---
         def criar_pasta_popup(ev: ft.ControlEvent):
-            nome_field = ft.TextField(label="Nome da Nova Pasta", width=300)
+            nome_field = ft.TextField(label="Nome da Nova Pasta", width=400)
 
             def salvar_pasta(ev2: ft.ControlEvent):
                 try:
@@ -63,40 +64,33 @@ def tree_page(page: ft.Page):
                     resp3.raise_for_status()
                     pasta_dropdown.all_options = resp3.json()
                     pasta_dropdown._build_chips()
-                except requests.RequestException as e:
-                    page.open(ft.SnackBar(ft.Text(f"Erro ao criar pasta: {e}")))
-                    
+                except requests.RequestException as err2:
+                    page.open(ft.SnackBar(ft.Text(f"Erro ao criar pasta: {err2}")))
                 subdialog.open = False
                 page.update()
 
             subdialog = ft.AlertDialog(
                 title=ft.Text("Criar Pasta"),
-                content=ft.Column([nome_field]),
+                content=ft.Column([nome_field], spacing=10),
                 actions=[ft.ElevatedButton("Gravar", on_click=salvar_pasta)]
             )
-                
             page.overlay.append(subdialog)
             subdialog.open = True
             page.update()
 
         criar_pasta_btn = ft.ElevatedButton("Criar Pasta", icon=ft.icons.ADD, on_click=criar_pasta_popup)
 
-        # lista de controles de permissão
+        # --- controles de permissão dinâmicos ---
         permissoes_controls: list[tuple[MultiSelectDropdown, MultiSelectDropdown]] = []
 
-        # --- adicionar linha de permissão ---
         def adicionar_permissao(ev: ft.ControlEvent):
             try:
                 tipos = requests.get(f"{API_URL}/tipos-permissao").json()
             except requests.RequestException:
                 tipos = []
             tp_dropdown = MultiSelectDropdown(
-                page,
-                tipos,
-                display_key="nome",
-                width=300,
-                hint_text="Tipo permissão",
-                max_selected_items=1
+                page, tipos, display_key="nome", width=400,
+                hint_text="Tipo permissão", max_selected_items=1
             )
 
             try:
@@ -104,24 +98,15 @@ def tree_page(page: ft.Page):
             except requests.RequestException:
                 grupos = []
             gp_dropdown = MultiSelectDropdown(
-                page,
-                grupos,
-                display_key="nome",
-                width=300,
-                hint_text="Grupos",
-                max_selected_items=None
+                page, grupos, display_key="nome", width=400,
+                hint_text="Grupos", max_selected_items=None
             )
 
             permissoes_controls.append((tp_dropdown, gp_dropdown))
-            # Adiciona linha de permissão
+            # insere antes dos botões
+            form_content.controls.insert(-2, ft.Divider())
             form_content.controls.insert(
-                -2,
-                ft.Row([tp_dropdown.widget(), gp_dropdown.widget()], spacing=10)
-            )
-            # Adiciona divisor após a permissão
-            form_content.controls.insert(
-                -2,
-                ft.Divider()
+                -2, ft.Row([tp_dropdown.widget(), gp_dropdown.widget()], spacing=10)
             )
             page.update()
 
@@ -135,10 +120,10 @@ def tree_page(page: ft.Page):
             page.update()
 
         def gravar(ev: ft.ControlEvent):
-            pasta_sel = pasta_dropdown.selected_options
-            pasta_id = int(pasta_sel[0]["id"]) if pasta_sel else None
+            selecionadas = pasta_dropdown.selected_options
+            pasta_id = int(selecionadas[0]["id"]) if selecionadas else None
 
-            body = {
+            payload = {
                 "WeBotPastas_pasta_id": pasta_id,
                 "auto": "S" if auto_switch.value else "N",
                 "gerado": "N",
@@ -153,30 +138,39 @@ def tree_page(page: ft.Page):
                 ]
             }
             try:
-                requests.post(f"{API_URL}/estrutura-permissao", json=body)
-                page.open(ft.SnackBar(ft.Text(f"Subpasta criada com sucesso!")))
-                
-            except requests.RequestException as e:
-                page.open(ft.SnackBar(ft.Text(f"Erro ao gravar permissão: {e}")))
-
-
-
+                requests.post(f"{API_URL}/estrutura-permissao", json=payload)
+                page.open(ft.SnackBar(ft.Text("Subpasta criada com sucesso!")))
+            except requests.RequestException as err3:
+                page.open(ft.SnackBar(ft.Text(f"Erro ao gravar permissão: {err3}")))
             dialog.open = False
             page.update()
 
-        # --- monta conteúdo do formulário ---
-        form_content = ft.Column([
-            ft.Text(f"Pasta Pai (ID): {parent_id}"),
-            auto_switch,
-            ft.Row([pasta_dropdown.widget(), criar_pasta_btn], spacing=10),
-            ft.Divider(),
-            adicionar_permissoes_btn,
-            ft.Row([], spacing=10),  # placeholder para linhas de permissão
-        ], spacing=15)
+        # --- monta o formulário ---
+        form_content = ft.Column(
+            [
+                ft.Text(f"Pasta Pai (ID): {parent_id}"),
+                auto_switch,
+                ft.Row([pasta_dropdown.widget(), criar_pasta_btn], spacing=10),
+                ft.Divider(),
+                adicionar_permissoes_btn,
+                ft.Row([], spacing=10),  # placeholder para futuras permissões
+            ],
+            spacing=15
+        )
 
+        # --- envolve em Column scrollable semelhante ao area_trabalho_page ---
+        scrollable_body = ft.Column(
+            controls=[form_content],
+            spacing=0,
+            scroll=ft.ScrollMode.AUTO,
+            width=800,
+            height=800,
+        )
+
+        # --- cria e exibe o diálogo ---
         dialog = ft.AlertDialog(
             title=ft.Text("Criar Nova Subpasta", size=20, weight="bold"),
-            content=ft.Container(content=form_content, width=800),
+            content=scrollable_body,
             actions=[
                 ft.ElevatedButton("CANCELAR", on_click=cancelar),
                 ft.ElevatedButton("GRAVAR", on_click=gravar),
@@ -186,6 +180,7 @@ def tree_page(page: ft.Page):
         page.overlay.append(dialog)
         dialog.open = True
         page.update()
+
 
     def render_node(node: dict, level: int = 0) -> list[ft.Control]:
         widgets: list[ft.Control] = []
