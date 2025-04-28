@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from sqlalchemy import create_engine, MetaData, Table, select
+from sqlalchemy import create_engine, MetaData, Table, select, update
 from typing import List, Optional
 from pydantic import BaseModel
 
@@ -18,6 +18,9 @@ Permissoes = Table("WeBotPastasPermissoes", metadata, autoload_with=engine)
 # Novas tabelas para consulta
 Grupos = Table("WeBotPastasgrupos", metadata, autoload_with=engine)
 TiposPermissao = Table("WeBotPastastipos_permissao", metadata, autoload_with=engine)
+
+# >>> Adicionando reflexão da tabela WeBotPastasEmpresas
+Empresas = Table("WeBotPastasEmpresas", metadata, autoload_with=engine)
 
 # Modelos Pydantic existentes
 
@@ -85,6 +88,7 @@ def get_arvore():
 def create_estrutura_permissao(data: EstruturaPermissaoCreate):
     try:
         with engine.begin() as conn:
+            # Inserir a nova estrutura
             stmt_estruturas = Estruturas.insert().values(
                 WeBotPastas_pasta_id=data.WeBotPastas_pasta_id,
                 auto=data.auto,
@@ -94,6 +98,8 @@ def create_estrutura_permissao(data: EstruturaPermissaoCreate):
             )
             result = conn.execute(stmt_estruturas)
             estrutura_id = result.inserted_primary_key[0]
+
+            # Inserir permissões associadas
             for mapping in data.permissoes:
                 for grupo in mapping.grupo_ids:
                     stmt_permissoes = Permissoes.insert().values(
@@ -102,9 +108,17 @@ def create_estrutura_permissao(data: EstruturaPermissaoCreate):
                         permissao_id=mapping.permissao_id
                     )
                     conn.execute(stmt_permissoes)
+
+            # >>> Atualizar a tabela WeBotPastasEmpresas se auto == 'S'
+            if data.auto == 'S':
+                stmt_update_empresas = update(Empresas).values(gerado='N')
+                conn.execute(stmt_update_empresas)
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Erro ao criar registros: {e}")
+    
     return {"estrutura_id": estrutura_id}
+
 
 # Endpoints para consulta simples
 
