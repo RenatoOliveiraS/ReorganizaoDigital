@@ -48,6 +48,7 @@ python -m venv venv
 ```
 pip install -r requirements.txt
 ```
+## Atenção - Após a instalação dos 'requirements.txt', por favor, reiniciar o VSCODE.
 
 ### 4. Configure as variáveis de ambiente
 
