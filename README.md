@@ -70,6 +70,45 @@ python src/create_db.py
 
 ```
 
+
+📁 Scripts de geração de pastas
+Scripts auxiliares que leem a estrutura do banco e criam diretórios locais com permissões, conforme regras definidas.
+
+⚠️ Devem ser executados localmente em ambiente Windows com permissão de administrador.
+
+🛠️ Pré-requisitos
+
+Um caminho base configurável para criação das pastas. Edite no topo dos scripts:
+
+```
+base_path = r'D:\\Arquivos'
+```
+
+📂 scripts/2_cria_auto_empresas_estrutura.py
+-Processa estruturas com auto == 'S'
+
+-Cria a hierarquia de pastas automaticamente para cada empresa cadastrada
+
+-Atualiza a tabela WeBotPastasEmpresasEstruturas
+
+```
+python scripts/2_cria_auto_empresas_estrutura.py
+```
+
+Ideal para agendamento via Agendador de Tarefas.
+
+🗂️ scripts/3_cria_estrutura.py
+-Processa estruturas com auto == 'N'
+
+-Cria diretórios manualmente definidos na tabela WeBotPastasEstruturas
+
+-Aplica permissões e heranças conforme o banco
+
+
+```
+python scripts/3_cria_estrutura.py
+```
+
 ---
 
 ## 🎯 Como executar a aplicação
@@ -110,6 +149,9 @@ ReorganizaoDigital/
 │   ├── api.py             # API REST usando FastAPI
 │   ├── app.py             # Aplicação Flet principal
 │   └── outros arquivos auxiliares...
+├── scripts/
+│   ├── 2_cria_auto_empresas_estrutura.py
+│   └── 3_cria_estrutura.py
 └── README.md
 ```
 
