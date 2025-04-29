@@ -51,7 +51,7 @@ pip install -r requirements.txt
 
 O projeto utiliza SQLAlchemy como ORM e está preparado para criar o banco a partir dos modelos Python.
 
-### 1. Configure o arquivo `.env`
+### a. Configure o arquivo `.env`
 
 Certifique-se de que o arquivo `.env` contém a variável `DATABASE_URI` com a string de conexão para seu banco MySQL. Exemplo:
 
@@ -61,7 +61,7 @@ DATABASE_URI='mysql+pymysql://usuario:senha@localhost:3306/nome_do_banco'
 
 Crie o banco de dados manualmente (caso ele ainda não exista) com o nome desejado usando sua ferramenta preferida (DBeaver, MySQL Workbench ou terminal).
 
-### 2. Crie as tabelas automaticamente
+### b. Crie as tabelas automaticamente
 
 Execute o script abaixo para criar todas as tabelas no banco com base nos modelos definidos:
 
