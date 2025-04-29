@@ -84,7 +84,7 @@ Um caminho base configurável para criação das pastas. Edite no topo dos scrip
 base_path = r'D:\\Arquivos'
 ```
 
-📂 scripts/2_cria_auto_empresas_estrutura.py
+📂 scripts/criar_pastas_automatica_por_empresa.py
 -Processa estruturas com auto == 'S'
 
 -Cria a hierarquia de pastas automaticamente para cada empresa cadastrada
@@ -92,12 +92,12 @@ base_path = r'D:\\Arquivos'
 -Atualiza a tabela WeBotPastasEmpresasEstruturas
 
 ```
-python scripts/2_cria_auto_empresas_estrutura.py
+python scripts/criar_pastas_automatica_por_empresa.py
 ```
 
 Ideal para agendamento via Agendador de Tarefas.
 
-🗂️ scripts/3_cria_estrutura.py
+🗂️ scripts/criar_pastas_estrutura_manual.py
 -Processa estruturas com auto == 'N'
 
 -Cria diretórios manualmente definidos na tabela WeBotPastasEstruturas
@@ -106,7 +106,7 @@ Ideal para agendamento via Agendador de Tarefas.
 
 
 ```
-python scripts/3_cria_estrutura.py
+python scripts/criar_pastas_estrutura_manual.py
 ```
 
 ---
@@ -162,8 +162,8 @@ ReorganizaoDigital/
 │   ├── app.py             # Aplicação Flet principal
 │   └── outros arquivos auxiliares...
 ├── scripts/
-│   ├── 2_cria_auto_empresas_estrutura.py
-│   |── 3_cria_estrutura.py
+│   ├── criar_pastas_automatica_por_empresa.py
+│   |── criar_pastas_estrutura_manual.py
 |   └── renomear_pastas.py
 └── README.md
 ```
