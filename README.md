@@ -48,7 +48,7 @@ python -m venv venv
 ```
 pip install -r requirements.txt
 ```
-## Atenção - Após a instalação dos 'requirements.txt', por favor, reiniciar o VSCODE.
+## Atenção - Após a instalação dos 'requirements.txt', por favor, reiniciar o VSCODE ou use o comando Developer: Reload Window (Ctrl+Shift+P → “Reload Window”) ou, mais simples, feche e reabra apenas o terminal integrado. Isso já faz o shell adotar o venv e não dá mais erro de módulo não encontrado.
 
 ### 4. Configure as variáveis de ambiente
 
