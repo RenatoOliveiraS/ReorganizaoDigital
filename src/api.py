@@ -2,11 +2,22 @@ from fastapi import FastAPI, HTTPException
 from sqlalchemy import create_engine, MetaData, Table, select, update
 from typing import List, Optional
 from pydantic import BaseModel
+import os
+from dotenv import load_dotenv
+from pathlib import Path
 
 app = FastAPI()
 
+# Carrega o .env que está um nível acima de src/
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+DATABASE_URI = os.getenv("DATABASE_URI")
+if not DATABASE_URI:
+    raise ValueError("DATABASE_URI não definida nas variáveis de ambiente.")
+
 # Configuração da conexão com o banco de dados
-DATABASE_URI = 'mysql+pymysql://Hugo_Full:pA8FQ!11[?@54.232.17.99:3306/AxioDataBase'
+
 engine = create_engine(DATABASE_URI, echo=False)
 metadata = MetaData()
 
