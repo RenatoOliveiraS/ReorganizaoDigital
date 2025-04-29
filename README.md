@@ -49,22 +49,6 @@ pip install -r requirements.txt
 
 ### 4. Configure as variáveis de ambiente
 
-Copie o arquivo `.env.example` para `.env` e preencha-o com as suas credenciais corretas:
-
-```bash
-cp .env.example .env
-```
-
-Exemplo do arquivo `.env`:
-
-```
-DATABASE_URI='mysql+pymysql://usuario:senha@host:porta/nome_do_banco'
-```
-
----
-
-## 🗃️ Como configurar o banco de dados
-
 O projeto utiliza SQLAlchemy como ORM e está preparado para criar o banco a partir dos modelos Python.
 
 ### 1. Configure o arquivo `.env`
