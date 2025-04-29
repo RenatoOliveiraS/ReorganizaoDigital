@@ -30,14 +30,14 @@ Este projeto é uma aplicação para gerenciamento e reorganização estruturada
 
 ### 1. Clone o repositório
 
-```bash
+```
 git clone https://github.com/RenatoOliveiraS/ReorganizaoDigital.git
 cd ReorganizaoDigital
 ```
 
 ### 2. Crie e ative um ambiente virtual (recomendado)
 
-```bash
+```
 python -m venv venv
 # Windows
 .\venv\Scripts\activate
@@ -45,7 +45,7 @@ python -m venv venv
 
 ### 3. Instale as dependências
 
-```bash
+```
 pip install -r requirements.txt
 ```
 
@@ -67,7 +67,7 @@ Crie o banco de dados manualmente (caso ele ainda não exista) com o nome deseja
 
 Execute o script abaixo para criar todas as tabelas no banco com base nos modelos definidos:
 
-```bash
+```
 python src/create_db.py
 
 ```
@@ -119,9 +119,9 @@ python scripts/criar_pastas_estrutura_manual.py
 - Atualiza `old_path` e marca como atualizado no banco
 - Útil para manter os nomes de diretórios em sincronia com o banco de dados
 
-```bash
+```
 python scripts/renomear_pastas.py
-
+```
 
 ---
 
@@ -131,8 +131,9 @@ python scripts/renomear_pastas.py
 
 No diretório raiz:
 
-```bash
-uvicorn src.api:app --reload
+```
+cd src
+uvicorn api:app --reload --port 8000
 ```
 
 Acesse a documentação da API em:
@@ -145,7 +146,7 @@ http://localhost:8000/docs
 
 Execute o seguinte comando no diretório raiz:
 
-```bash
+```
 python src/app.py
 ```
 
@@ -153,7 +154,7 @@ python src/app.py
 
 ## 🛠️ Estrutura do projeto
 
-```bash
+```
 ReorganizaoDigital/
 ├── .env                   # Variáveis de ambiente locais (não versionado)
 ├── .env.example           # Exemplo para configuração inicial
@@ -179,3 +180,6 @@ ReorganizaoDigital/
 - [Documentação SQLAlchemy](https://docs.sqlalchemy.org/en/20/)
 
 ---
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
