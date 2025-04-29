@@ -111,6 +111,18 @@ python scripts/3_cria_estrutura.py
 
 ---
 
+### 📝 `scripts/renomear_pastas.py`
+
+- Renomeia pastas de acordo com registros marcados para atualização (`razao_social_atualizar = 'S'`)
+- Atualiza `old_path` e marca como atualizado no banco
+- Útil para manter os nomes de diretórios em sincronia com o banco de dados
+
+```bash
+python scripts/renomear_pastas.py
+
+
+---
+
 ## 🎯 Como executar a aplicação
 
 ### 1. Executar API (backend)
@@ -151,7 +163,8 @@ ReorganizaoDigital/
 │   └── outros arquivos auxiliares...
 ├── scripts/
 │   ├── 2_cria_auto_empresas_estrutura.py
-│   └── 3_cria_estrutura.py
+│   |── 3_cria_estrutura.py
+|   └── renomear_pastas.py
 └── README.md
 ```
 
