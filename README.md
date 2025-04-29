@@ -1,16 +1,18 @@
 
 # Reorganização Digital
 
-Este projeto é uma aplicação que permite o gerenciamento e reorganização estruturada de pastas e permissões, construída utilizando **FastAPI**, **Flet** e **SQLAlchemy**.
+Este projeto é uma aplicação para gerenciamento e reorganização estruturada de pastas e permissões, utilizando **FastAPI**, **Flet**, **SQLAlchemy** e **MySQL**. Ele permite a criação automatizada de diretórios no sistema de arquivos com base em dados configurados no banco, além de controle granular de permissões NTFS.
+
 
 ---
 
 ## 📌 Funcionalidades principais:
 
-- Gerenciamento estruturado e visualização em árvore das pastas.
-- Controle detalhado de permissões por grupos.
-- Interface visual simples, eficiente e intuitiva construída com Flet.
-- API REST para integração com outros sistemas.
+- Gerenciamento visual e hierárquico de pastas por empresas
+- Criação automática e manual de estruturas de diretórios
+- Controle de permissões baseado em grupos
+- Integração por API REST com FastAPI
+- Interface gráfica com Flet
 
 ---
 
